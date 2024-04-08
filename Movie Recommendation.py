@@ -1,10 +1,3 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# ## Movie Recommendation System
-
-# In[1]:
-
 
 import numpy as np
 import pandas as pd
@@ -16,41 +9,17 @@ from sklearn.metrics.pairwise import cosine_similarity
 from ast import literal_eval
 
 
-# In[2]:
-
-
 path = "./Desktop/TechVidvan/movie_recommendation"
 credits_df = pd.read_csv(path + "/tmdb_credits.csv")
 movies_df = pd.read_csv(path + "/tmdb_movies.csv")
 
-
-# In[3]:
-
-
 movies_df.head()
-
-
-# In[4]:
-
 
 credits_df.head()
 
-
-# In[5]:
-
-
 credits_df.columns = ['id','tittle','cast','crew']
 movies_df = movies_df.merge(credits_df, on="id")
-
-
-# In[6]:
-
-
 movies_df.head()
-
-
-# In[7]:
-
 
 # Demographic Filtering
 C = movies_df["vote_average"].mean()
@@ -63,9 +32,6 @@ new_movies_df = movies_df.copy().loc[movies_df["vote_count"] >= m]
 print(new_movies_df.shape)
 
 
-# In[8]:
-
-
 def weighted_rating(x, C=C, m=m):
     v = x["vote_count"]
     R = x["vote_average"]
@@ -73,17 +39,10 @@ def weighted_rating(x, C=C, m=m):
     return (v/(v + m) * R) + (m/(v + m) * C)
 
 
-# In[9]:
-
-
 new_movies_df["score"] = new_movies_df.apply(weighted_rating, axis=1)
 new_movies_df = new_movies_df.sort_values('score', ascending=False)
 
 new_movies_df[["title", "vote_count", "vote_average", "score"]].head(10)
-
-
-# In[10]:
-
 
 # Plot top 10 movies
 def plot():
@@ -99,15 +58,8 @@ def plot():
 plot()
 
 
-# In[11]:
-
-
 # Content based Filtering
 print(movies_df["overview"].head(5))
-
-
-# In[12]:
-
 
 tfidf = TfidfVectorizer(stop_words="english")
 movies_df["overview"] = movies_df["overview"].fillna("")
@@ -115,19 +67,12 @@ movies_df["overview"] = movies_df["overview"].fillna("")
 tfidf_matrix = tfidf.fit_transform(movies_df["overview"])
 print(tfidf_matrix.shape)
 
-
-# In[13]:
-
-
 # Compute similarity
 cosine_sim = linear_kernel(tfidf_matrix, tfidf_matrix)
 print(cosine_sim.shape)
 
 indices = pd.Series(movies_df.index, index=movies_df["title"]).drop_duplicates()
 print(indices.head())
-
-
-# In[14]:
 
 
 def get_recommendations(title, cosine_sim=cosine_sim):
@@ -151,9 +96,6 @@ def get_recommendations(title, cosine_sim=cosine_sim):
     return movies
 
 
-# In[15]:
-
-
 print("################ Content Based Filtering - plot#############")
 print()
 print("Recommendations for The Dark Knight Rises")
@@ -161,9 +103,6 @@ print(get_recommendations("The Dark Knight Rises"))
 print()
 print("Recommendations for Avengers")
 print(get_recommendations("The Avengers"))
-
-
-# In[16]:
 
 
 features = ["cast", "crew", "keywords", "genres"]
@@ -174,18 +113,11 @@ for feature in features:
 movies_df[features].head(10)
 
 
-# In[17]:
-
-
 def get_director(x):
     for i in x:
         if i["job"] == "Director":
             return i["name"]
     return np.nan
-
-
-# In[18]:
-
 
 def get_list(x):
     if isinstance(x, list):
@@ -198,24 +130,13 @@ def get_list(x):
 
     return []
 
-
-# In[19]:
-
-
 movies_df["director"] = movies_df["crew"].apply(get_director)
 
 features = ["cast", "keywords", "genres"]
 for feature in features:
     movies_df[feature] = movies_df[feature].apply(get_list)
 
-
-# In[21]:
-
-
 movies_df[['title', 'cast', 'director', 'keywords', 'genres']].head()
-
-
-# In[22]:
 
 
 def clean_data(x):
@@ -227,16 +148,9 @@ def clean_data(x):
         else:
             return ""
 
-
-# In[23]:
-
-
 features = ['cast', 'keywords', 'director', 'genres']
 for feature in features:
     movies_df[feature] = movies_df[feature].apply(clean_data)
-
-
-# In[24]:
 
 
 def create_soup(x):
@@ -245,9 +159,6 @@ def create_soup(x):
 
 movies_df["soup"] = movies_df.apply(create_soup, axis=1)
 print(movies_df["soup"].head())
-
-
-# In[25]:
 
 
 count_vectorizer = CountVectorizer(stop_words="english")
@@ -262,9 +173,6 @@ movies_df = movies_df.reset_index()
 indices = pd.Series(movies_df.index, index=movies_df['title'])
 
 
-# In[26]:
-
-
 print("################ Content Based System - metadata #############")
 print("Recommendations for The Dark Knight Rises")
 print(get_recommendations("The Dark Knight Rises", cosine_sim2))
@@ -273,7 +181,6 @@ print("Recommendations for Avengers")
 print(get_recommendations("The Avengers", cosine_sim2))
 
 
-# In[ ]:
 
 
 
